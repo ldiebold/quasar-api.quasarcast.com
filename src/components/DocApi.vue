@@ -135,6 +135,7 @@
               >
                 <DocApiEntry
                   :type="tab"
+                  :scroll-to="scrollTo"
                   :definition="filteredApi[tab][innerTab]"
                 />
               </q-tab-panel>
@@ -147,6 +148,7 @@
             <DocApiEntry
               :type="tab"
               :definition="filteredApi[tab][defaultInnerTabName]"
+              :scroll-to="scrollTo"
             />
           </div>
         </q-tab-panel>
@@ -327,7 +329,13 @@ export default {
       default: null
     },
 
-    pageLink: Boolean
+    pageLink: Boolean,
+
+    scrollTo: {
+      required: false,
+      type: String,
+      default: null
+    }
   },
 
   setup (props) {

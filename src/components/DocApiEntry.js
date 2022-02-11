@@ -1,5 +1,7 @@
-import { h } from 'vue'
-import { QBadge } from 'quasar'
+import { h, onMounted } from 'vue'
+import { QBadge, scroll } from 'quasar'
+
+const { setVerticalScrollPosition, getScrollTarget } = scroll
 
 import './DocApiEntry.sass'
 
@@ -74,7 +76,7 @@ function getNameDiv (label, level) {
   ])
 }
 
-function getExtendedNameDiv (label, level, type, required, addedIn) {
+function getExtendedNameDiv (label, level, type, required, addedIn, tab) {
   const suffix = `${type ? ` : ${type}` : ''}${required ? ' - required!' : ''}`
 
   const child = [
@@ -97,7 +99,7 @@ function getExtendedNameDiv (label, level, type, required, addedIn) {
     )
   }
 
-  return h('div', { class: 'api-row__item col-xs-12 col-sm-12' }, [
+  return h('div', { class: 'api-row__item col-xs-12 col-sm-12', 'data-id': `${level}-${label}` }, [
     h('div', { class: 'api-row__value' }, child)
   ])
 }
@@ -469,10 +471,29 @@ export default {
 
   props: {
     type: String,
-    definition: [Object, String]
+    definition: [Object, String],
+    scrollTo: {
+      required: false,
+      type: String,
+      default: null
+    }
   },
 
   setup (props) {
+    function scrollToElement (el) {
+      const target = getScrollTarget(el)
+      const offset = el.offsetTop
+      const duration = 0
+      setVerticalScrollPosition(target, offset, duration)
+    }
+
+    onMounted(() => {
+      scrollToElement(document.querySelector(`[data-id="${props.scrollTo}"]`))
+      // const apiRowsElement = document.querySelector(`[data-id="${props.scrollTo}"]`)
+      // const scrollToPosition = getVerticalScrollPosition(apiRowsElement)
+      // console.log(scrollToPosition)
+      // setVerticalScrollPosition(scrollToPosition, 0)
+    })
     return () => {
       const content = Object.keys(props.definition).length !== 0
         ? describe[props.type](props.definition)

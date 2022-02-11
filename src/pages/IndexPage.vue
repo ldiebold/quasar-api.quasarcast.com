@@ -8,6 +8,7 @@
     slugified-title="meep"
     :default-tab="defaultTab"
     :default-inner-tab="innerTab"
+    :scroll-to="scrollTo"
   />
   <div v-else>
     invalid url. Try adding "?item=QTable" at the end of the url 😊
@@ -24,4 +25,5 @@ const params = useUrlSearchParams()
 const defaultTab = ref(params.tab)
 const innerTab = ref(params['inner-tab'])
 const item = ref(params.item)
+const scrollTo = ref(params['scroll-to'])
 </script>
