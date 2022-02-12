@@ -1,5 +1,7 @@
 import { h, onMounted } from 'vue'
-import { QBadge, scroll } from 'quasar'
+import { QBadge, QIcon, scroll } from 'quasar'
+
+import { mdiHandPointingLeft } from '@quasar/extras/mdi-v6'
 
 const { setVerticalScrollPosition, getScrollTarget } = scroll
 
@@ -65,7 +67,7 @@ function getDiv (col, propName, propValue, slot) {
 }
 
 function getNameDiv (label, level) {
-  return h('div', { class: 'api-row__item col-xs-12 col-sm-12' }, [
+  return h('div', { class: 'api-row__item col-xs-12 col-sm-12 bg-blue', 'data-id': `${level}-${label}` }, [
     h('div', { class: 'api-row__value' }, [
       h(QBadge, {
         color: NAME_PROP_COLOR[level],
@@ -76,7 +78,7 @@ function getNameDiv (label, level) {
   ])
 }
 
-function getExtendedNameDiv (label, level, type, required, addedIn, tab) {
+function getExtendedNameDiv (label, level, type, required, addedIn, scrollTo) {
   const suffix = `${type ? ` : ${type}` : ''}${required ? ' - required!' : ''}`
 
   const child = [
@@ -99,18 +101,27 @@ function getExtendedNameDiv (label, level, type, required, addedIn, tab) {
     )
   }
 
-  return h('div', { class: 'api-row__item col-xs-12 col-sm-12', 'data-id': `${level}-${label}` }, [
-    h('div', { class: 'api-row__value' }, child)
-  ])
+  const identifier = `${level}-${label}`
+
+  const children = [h('div', { class: 'api-row__value' }, child)]
+
+  if (identifier === scrollTo) {
+    children.push(h(QIcon, { name: mdiHandPointingLeft, size: 'md', class: 'q-ml-sm', color: 'accent' }))
+  }
+
+  return h('div', {
+    class: ['api-row__item col-xs-12 col-sm-12 row items-center'],
+    'data-id': `${level}-${label}`
+  }, children)
 }
 
-function getProp (prop, propName, level, onlyChildren) {
+function getProp (prop, propName, level, onlyChildren, scrollTo) {
   const type = getStringType(prop.type)
   const child = []
 
   if (propName !== void 0) {
     child.push(
-      getExtendedNameDiv(propName, level, type, type !== 'Function' && prop.required === true, prop.addedIn)
+      getExtendedNameDiv(propName, level, type, type !== 'Function' && prop.required === true, prop.addedIn, scrollTo)
     )
 
     if (prop.reactive === true) {
@@ -266,12 +277,12 @@ function getProp (prop, propName, level, onlyChildren) {
 
 const describe = {}
 
-describe.props = props => {
+describe.props = (props, scrollTo) => {
   const child = []
 
   for (const propName in props) {
     child.push(
-      getProp(props[propName], propName, 0)
+      getProp(props[propName], propName, 0, undefined, scrollTo)
     )
   }
 
@@ -488,15 +499,14 @@ export default {
     }
 
     onMounted(() => {
-      scrollToElement(document.querySelector(`[data-id="${props.scrollTo}"]`))
-      // const apiRowsElement = document.querySelector(`[data-id="${props.scrollTo}"]`)
-      // const scrollToPosition = getVerticalScrollPosition(apiRowsElement)
-      // console.log(scrollToPosition)
-      // setVerticalScrollPosition(scrollToPosition, 0)
+      const targetScrollToEl = document.querySelector(`[data-id="${props.scrollTo}"]`)
+      if (targetScrollToEl) {
+        scrollToElement(targetScrollToEl)
+      }
     })
     return () => {
       const content = Object.keys(props.definition).length !== 0
-        ? describe[props.type](props.definition)
+        ? describe[props.type](props.definition, props.scrollTo)
         : [
             h('div', { class: 'q-pa-md doc-api__nothing-to-show' }, [
               h('div', 'No matching entries found on this tab.'),
