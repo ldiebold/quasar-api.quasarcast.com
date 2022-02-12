@@ -66,22 +66,30 @@ function getDiv (col, propName, propValue, slot) {
   ])
 }
 
-function getNameDiv (label, level) {
-  return h('div', { class: 'api-row__item col-xs-12 col-sm-12 bg-blue', 'data-id': `${level}-${label}` }, [
-    h('div', { class: 'api-row__value' }, [
-      h(QBadge, {
-        color: NAME_PROP_COLOR[level],
-        label,
-        style: 'font-size: 1em; line-height: 1.2em'
-      })
-    ])
+function getNameDiv (label, level, scrollTo) {
+  const identifier = `${level}-${label}`
+
+  const children = [
+    h(QBadge, {
+      color: NAME_PROP_COLOR[level],
+      label,
+      style: 'font-size: 1em; line-height: 1.2em'
+    })
+  ]
+
+  if (identifier === scrollTo) {
+    children.push(h(QIcon, { name: mdiHandPointingLeft, size: 'md', class: 'q-ml-sm', color: 'accent' }))
+  }
+
+  return h('div', { class: 'api-row__item col-xs-12 col-sm-12', 'data-id': `${level}-${label}` }, [
+    h('div', { class: 'api-row__value' }, children)
   ])
 }
 
 function getExtendedNameDiv (label, level, type, required, addedIn, scrollTo) {
   const suffix = `${type ? ` : ${type}` : ''}${required ? ' - required!' : ''}`
 
-  const child = [
+  const children = [
     h(QBadge, {
       color: NAME_PROP_COLOR[level],
       label,
@@ -91,7 +99,7 @@ function getExtendedNameDiv (label, level, type, required, addedIn, scrollTo) {
   ]
 
   if (addedIn !== void 0) {
-    child.push(
+    children.push(
       h(QBadge, {
         class: 'q-ml-sm',
         color: 'black',
@@ -103,8 +111,6 @@ function getExtendedNameDiv (label, level, type, required, addedIn, scrollTo) {
 
   const identifier = `${level}-${label}`
 
-  const children = [h('div', { class: 'api-row__value' }, child)]
-
   if (identifier === scrollTo) {
     children.push(h(QIcon, { name: mdiHandPointingLeft, size: 'md', class: 'q-ml-sm', color: 'accent' }))
   }
@@ -112,7 +118,7 @@ function getExtendedNameDiv (label, level, type, required, addedIn, scrollTo) {
   return h('div', {
     class: ['api-row__item col-xs-12 col-sm-12 row items-center'],
     'data-id': `${level}-${label}`
-  }, children)
+  }, [h('div', { class: 'api-row__value' }, children)])
 }
 
 function getProp (prop, propName, level, onlyChildren, scrollTo) {
@@ -187,7 +193,7 @@ function getProp (prop, propName, level, onlyChildren, scrollTo) {
     const nodes = []
     for (const propName in prop.definition) {
       nodes.push(
-        getProp(prop.definition[propName], propName, 2)
+        getProp(prop.definition[propName], propName, 2, undefined, scrollTo)
       )
     }
 
@@ -208,7 +214,7 @@ function getProp (prop, propName, level, onlyChildren, scrollTo) {
 
     for (const propName in prop.params) {
       nodes.push(
-        getProp(prop.params[propName], propName, newLevel)
+        getProp(prop.params[propName], propName, newLevel, undefined, scrollTo)
       )
     }
 
@@ -231,7 +237,7 @@ function getProp (prop, propName, level, onlyChildren, scrollTo) {
         h(
           'div',
           { class: 'api-row__subitem' },
-          [getProp(prop.returns, void 0, 0)]
+          [getProp(prop.returns, void 0, 0, undefined, scrollTo)]
         )
       )
     )
@@ -241,7 +247,7 @@ function getProp (prop, propName, level, onlyChildren, scrollTo) {
     const nodes = []
     for (const propName in prop.scope) {
       nodes.push(
-        getProp(prop.scope[propName], propName, 1)
+        getProp(prop.scope[propName], propName, 1, undefined, scrollTo)
       )
     }
 
@@ -289,19 +295,19 @@ describe.props = (props, scrollTo) => {
   return child
 }
 
-describe.slots = slots => {
+describe.slots = (slots, scrollTo) => {
   const child = []
 
   for (const slot in slots) {
     child.push(
-      getProp(slots[slot], slot, 0)
+      getProp(slots[slot], slot, 0, undefined, scrollTo)
     )
   }
 
   return child
 }
 
-describe.events = events => {
+describe.events = (events, scrollTo) => {
   const child = []
 
   if (events === void 0) {
@@ -315,7 +321,7 @@ describe.events = events => {
     if (event.params !== void 0) {
       for (const paramName in event.params) {
         params.push(
-          getProp(event.params[paramName], paramName, 1)
+          getProp(event.params[paramName], paramName, 1, undefined, scrollTo)
         )
       }
     } else {
@@ -326,7 +332,7 @@ describe.events = events => {
 
     child.push(
       h('div', { class: 'api-row row' }, [
-        getNameDiv(`@${eventName}${getEventParams(event)}`, 0),
+        getNameDiv(`@${eventName}${getEventParams(event)}`, 0, scrollTo),
         event.addedIn !== void 0
           ? getDiv(12, 'Added in', event.addedIn)
           : null,
@@ -343,14 +349,14 @@ describe.events = events => {
   return child
 }
 
-describe.methods = methods => {
+describe.methods = (methods, scrollTo) => {
   const child = []
 
   for (const methodName in methods) {
     const method = methods[methodName]
 
     const nodes = [
-      getNameDiv(`${methodName}${getMethodParams(method)}${getMethodReturnValue(method)}`, 0),
+      getNameDiv(`${methodName}${getMethodParams(method)}${getMethodReturnValue(method)}`, 0, scrollTo),
       method.addedIn !== void 0
         ? getDiv(12, 'Added in', method.addedIn)
         : null,
@@ -361,7 +367,7 @@ describe.methods = methods => {
       const props = []
       for (const paramName in method.params) {
         props.push(
-          getProp(method.params[paramName], paramName, 1)
+          getProp(method.params[paramName], paramName, 1, undefined, scrollTo)
         )
       }
       nodes.push(
