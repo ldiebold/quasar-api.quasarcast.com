@@ -26,7 +26,7 @@ function generateUrl () {
   // const queryString = query.toString()
   //   .replace('+', '%20')
 
-  iframeUrl.value = 'https://quasar-api.quasarcast.com/?' + query.toString()
+  iframeUrl.value = 'http://localhost:8080/?' + query.toString()
 }
 
 function handleCopyIframeUrl () {

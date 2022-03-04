@@ -5,7 +5,7 @@ import { useUrlSearchParams } from '@vueuse/core'
 
 const params = useUrlSearchParams()
 
-const defaultTab = ref(params.tab)
+const currentTab = ref(params.current || '__default')
 const innerTab = ref(params['inner-tab'])
 const item = ref(params.item)
 const scrollTo = ref(params['scroll-to'])
@@ -16,11 +16,11 @@ const scrollTo = ref(params['scroll-to'])
     v-if="item"
     ref="apiRef"
     :key="item"
+    v-model:current-tab="currentTab"
+    v-model:current-inner-tab="innerTab"
     :file="item"
     page-link
     slugified-title="meep"
-    :default-tab="defaultTab"
-    :default-inner-tab="innerTab"
     :scroll-to="scrollTo"
   />
   <div v-else>
