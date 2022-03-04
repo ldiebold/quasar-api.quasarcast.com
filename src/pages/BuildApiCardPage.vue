@@ -51,7 +51,7 @@ function handleCopyIframeUrl () {
   const notifyOptions = {
     message: 'Copied Iframe Code',
     color: 'light-blue',
-    icon: 'content_copy'
+    icon: 'mdi-content-copy'
   }
 
   copyToClipboard(iframeUrl.value)
