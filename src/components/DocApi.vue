@@ -1,3 +1,4 @@
+<!-- eslint-disable -->
 <template>
   <q-card
     class="doc-api"
@@ -12,14 +13,16 @@
       <q-btn
         v-if="pageLink"
         class="q-mr-sm"
+        type="a"
         size="sm"
         padding="xs sm"
         color="brand-primary"
         no-caps="no-caps"
         unelevated="unelevated"
-        :to="docPath"
+        :href="`https://quasar.dev${docPath}`"
+        target="_blank"
       >
-        <q-icon name="launch" />
+        <q-icon name="mdi-open-in-new" />
         <div class="q-ml-xs">
           Docs
         </div>
@@ -137,6 +140,7 @@
                   :type="tab"
                   :scroll-to="scrollTo"
                   :definition="filteredApi[tab][innerTab]"
+                  @entry-clicked="identifier => $emit('entry-clicked', identifier)"
                 />
               </q-tab-panel>
             </q-tab-panels>
@@ -149,6 +153,7 @@
               :type="tab"
               :definition="filteredApi[tab][defaultInnerTabName]"
               :scroll-to="scrollTo"
+              @entry-clicked="identifier => $emit('entry-clicked', identifier)"
             />
           </div>
         </q-tab-panel>
@@ -158,11 +163,13 @@
 </template>
 
 <script>
+/* eslint-disable */
 import { ref, computed, watch, onMounted } from 'vue'
 import { mdiClose, mdiMagnify } from '@quasar/extras/mdi-v6'
 
 import CardTitle from './CardTitle.vue'
 import DocApiEntry from './DocApiEntry.js'
+import { useVModels } from '@vueuse/core'
 
 const defaultInnerTabName = '__default'
 
@@ -318,27 +325,31 @@ export default {
       required: true
     },
 
-    defaultTab: {
-      required: false,
+    currentTab: {
+      required: true,
       type: String,
-      default: null
     },
-    defaultInnerTab: {
-      required: false,
+    currentInnerTab: {
+      required: true,
       type: String,
-      default: null
     },
-
-    pageLink: Boolean,
 
     scrollTo: {
       required: false,
       type: String,
       default: null
-    }
+    },
+
+    pageLink: Boolean
   },
 
-  setup (props) {
+  emits: [
+    'entry-clicked',
+    'update:currentTab',
+    'update:currentInnerTab'
+  ],
+
+  setup (props, { emit }) {
     const inputRef = ref(null)
 
     const loading = ref(true)
@@ -353,8 +364,7 @@ export default {
     const tabsList = ref([])
     const innerTabsList = ref({})
 
-    const currentTab = ref(props.defaultTab)
-    const currentInnerTab = ref(props.defaultInnerTab)
+    const { currentTab, currentInnerTab } = useVModels(props, emit)
 
     watch(currentTab, val => {
       currentInnerTab.value = props.defaultInnerTab || innerTabsList.value[val][0]

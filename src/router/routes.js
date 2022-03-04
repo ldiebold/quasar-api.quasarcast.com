@@ -1,6 +1,16 @@
 
 const routes = [
   {
+    path: '/build',
+    component: () => import('layouts/BlankLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('pages/BuildApiCardPage.vue')
+      }
+    ]
+  },
+  {
     path: '/',
     component: () => import('pages/IndexPage.vue')
   },
@@ -9,7 +19,7 @@ const routes = [
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/Error404.vue')
+    component: () => import('pages/ErrorPage404.vue')
   }
 ]
 
