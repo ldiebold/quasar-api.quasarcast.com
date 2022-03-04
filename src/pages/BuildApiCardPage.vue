@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import DocApi from 'components/DocApi'
 import apiList from 'quasar/dist/transforms/api-list.json'
 import { copyToClipboard, Notify } from 'quasar'
 
-const item = ref('QSelect')
+const item = ref()
 const options = ref(apiList)
 
 const split = ref(50)
@@ -14,6 +14,24 @@ const iframeUrl = ref('')
 const currentTab = ref('')
 const currentInnerTab = ref('')
 const currentEntry = ref('')
+
+watch(item, (newItem) => {
+  if (newItem) {
+    generateUrl()
+  }
+})
+
+watch(currentTab, (newCurrentTab) => {
+  if (newCurrentTab) {
+    generateUrl()
+  }
+})
+
+watch(currentInnerTab, (newCurrentInnerTab) => {
+  if (newCurrentInnerTab) {
+    generateUrl()
+  }
+})
 
 function generateUrl () {
   const query = new URLSearchParams({
@@ -26,7 +44,7 @@ function generateUrl () {
   // const queryString = query.toString()
   //   .replace('+', '%20')
 
-  iframeUrl.value = 'http://localhost:8080/?' + query.toString()
+  iframeUrl.value = 'https://quasar-api.quasarcast.com/?' + query.toString()
 }
 
 function handleCopyIframeUrl () {
